@@ -1,34 +1,59 @@
 import { useEffect, useState, CSSProperties } from "react";
-import logo from "../assets/logo.png";
-import { Star, ShoppingCart, Tag } from "lucide-react";
+import logo from "../../../logo.png";
+import { ShoppingCart, Store, Tag, Star } from "lucide-react";
+import axios from "axios";
 
 const App = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // State to store product data
   const [productName, setProductName] = useState<string>("Loading...");
   const [productPrice, setProductPrice] = useState<string>("Loading...");
   const [productRating, setProductRating] = useState<string>("Loading...");
+  const [productWebsite, setProductWebsite] = useState<string>("Loading...");
 
-  // Listen for product data messages from the background script
-  useEffect(() => {
-    console.log("Popup Loaded, Waiting for Data...");
 
-    chrome.runtime.onMessage.addListener((message) => {
+  const [alternatives, setAlternatives] = useState<string[]>([]);
+
+  useEffect(() => {  
+    const messageListener = (message: { action: string; alternatives?: string[]; name?: string; price?: string; rating?: string; website?: string }) => {  
       if (message.action === "updatePopup") {
-        console.log("Received Data:", message);
-
         setProductName(message.name || "Not Found");
         setProductPrice(message.price || "Not Found");
         setProductRating(message.rating || "Not Found");
+        setProductWebsite(message.website || "Not Found");
       }
-    });
-
-    return () => {
-      chrome.runtime.onMessage.removeListener(() => {});
+  
+      if (message.action === "displayAlternatives") {
+        setAlternatives(message.alternatives || []);
+        setLoading(false);
+      }
     };
-  }, []);
+  
+    chrome.runtime.onMessage.addListener(messageListener);
+    chrome.runtime.sendMessage({ action: "requestProductData" });
+  
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener);
+    };
+  }, []);   
+
+  const findAlternatives = () => {
+    setLoading(true);
+    chrome.runtime.sendMessage(
+      {
+        action: "findEcoAlternatives",
+        productName,
+        productPrice,
+        productRating,
+        productWebsite,
+      },
+      (response) => {
+        if (chrome.runtime.lastError) setLoading(false);
+      }
+    );
+  };  
 
   return (
     <div style={windowStyle}>
@@ -39,6 +64,7 @@ const App = () => {
       <h1>Current Product Info</h1>
       <div style={detailStyle}>
         <p><ShoppingCart size={20} color="#2e7d32"/> <strong>Product:</strong> {productName}</p>
+        <p><Store size={20} color="#2e7d32"/> <strong>Website:</strong> {productWebsite}</p>
         <p><Tag size={20} color="#2e7d32" /> <strong>Price:</strong> {productPrice}</p>
         <p><Star size={20} color="#2e7d32" /> <strong>Rating:</strong> {productRating}</p>
       </div>
@@ -52,8 +78,24 @@ const App = () => {
         onMouseLeave={() => setIsHovered(false)}
         onMouseDown={() => setIsClicked(true)}
         onMouseUp={() => setIsClicked(false)}
-        onClick={() => chrome.runtime.sendMessage({ action: "openProductPage" })}
+        onClick={findAlternatives}
       > Search Eco-Friendly Alternatives</button>
+      {loading && (
+        <div style={{ marginTop: "10px", textAlign: "center" }}>
+          <p style={{ fontStyle: "italic", color: "#2e7d32", fontSize: "18px" }}>Finding alternatives...</p>
+          <div className="spinner"></div>
+        </div>
+      )}
+      {alternatives.length > 0 && (
+        <div style={{ marginTop: "15px" }}>
+          <h2>Eco-Friendly Alternatives:</h2>
+          <ul>
+            {alternatives.map((alt, index) => (
+              <li key={index}><a href={alt} target="_blank" style={{ color: "#2e7d32", textDecoration: "none" }}>{alt}</a></li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
@@ -107,3 +149,17 @@ const windowStyle: CSSProperties = {
   flexDirection: "column",
   alignItems: "center",
 };
+
+const spinnerStyle: CSSProperties = {
+  width: "30px",
+  height: "30px",
+  border: "4px solid #2e7d32",
+  borderTop: "4px solid transparent",
+  borderRadius: "50%",
+  animation: "spin 1s linear infinite",
+}; const keyframesStyle = `@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}`; const styleTag = document.createElement("style");
+styleTag.innerHTML = keyframesStyle;
+document.head.appendChild(styleTag);

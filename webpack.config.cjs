@@ -1,4 +1,6 @@
 const path = require("path");
+const Dotenv = require("dotenv-webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "production",
@@ -25,6 +27,16 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new Dotenv(),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "manifest.json", to: "manifest.json" }, // ✅ Copy manifest.json
+        { from: "index.html", to: "index.html" }, // ✅ Copy index.html
+        { from: "logo.png", to: "logo.png" }, // ✅ Copy logo.png
+      ],
+    }),
+  ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
