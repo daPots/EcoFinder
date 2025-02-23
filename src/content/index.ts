@@ -1,12 +1,7 @@
-console.log("🚀 EcoFinder Content Script Loaded on:", window.location.href);
-
 const getWebsiteName = (): string => {
   const hostname = window.location.hostname;
   const cleanHostname = hostname.replace(/^www\./, "");
   const websiteName = cleanHostname.split(".")[0];
-  console.log("🌍 Extracted Website Name:", websiteName); 
-
-
   return websiteName.charAt(0).toUpperCase() + websiteName.slice(1);
 };
 

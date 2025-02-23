@@ -31,9 +31,9 @@ module.exports = {
     new Dotenv(),
     new CopyWebpackPlugin({
       patterns: [
-        { from: "manifest.json", to: "manifest.json" }, // ✅ Copy manifest.json
-        { from: "index.html", to: "index.html" }, // ✅ Copy index.html
-        { from: "logo.png", to: "logo.png" }, // ✅ Copy logo.png
+        { from: "manifest.json", to: "manifest.json" },
+        { from: "index.html", to: "index.html" },
+        { from: "logo.png", to: "logo.png" },
       ],
     }),
   ],

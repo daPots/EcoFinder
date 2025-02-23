@@ -14,10 +14,10 @@ const App = () => {
   const [productWebsite, setProductWebsite] = useState<string>("Loading...");
 
 
-  const [alternatives, setAlternatives] = useState<string[]>([]);
+  const [alternatives, setAlternatives] = useState<string[][]>([]);
 
   useEffect(() => {  
-    const messageListener = (message: { action: string; alternatives?: string[]; name?: string; price?: string; rating?: string; website?: string }) => {  
+    const messageListener = (message: { action: string; alternatives?: string[][]; name?: string; price?: string; rating?: string; website?: string }) => {  
       if (message.action === "updatePopup") {
         setProductName(message.name || "Not Found");
         setProductPrice(message.price || "Not Found");
@@ -87,11 +87,15 @@ const App = () => {
         </div>
       )}
       {alternatives.length > 0 && (
-        <div style={{ marginTop: "15px" }}>
+        <div style={alternativesContainerStyle}>
           <h2>Eco-Friendly Alternatives:</h2>
           <ul>
             {alternatives.map((alt, index) => (
-              <li key={index}><a href={alt} target="_blank" style={{ color: "#2e7d32", textDecoration: "none" }}>{alt}</a></li>
+              <li key={index} style={alternativeItemStyle}>
+                <p><strong>Alternative:</strong> {alt[0]}</p>
+                <p><strong>URL:</strong> <a href={alt[1]} target="_blank" rel="noopener noreferrer" style={urlStyle}>{alt[1]}</a></p>
+                <p><strong>Description:</strong> {alt[2]}</p>
+              </li>
             ))}
           </ul>
         </div>
@@ -101,6 +105,30 @@ const App = () => {
 };
 
 export default App;
+
+const urlStyle: CSSProperties = {
+  color: "#2e7d32",
+  textDecoration: "none",
+  cursor: "pointer",
+  wordBreak: "break-word",
+  overflowWrap: "break-word",
+  display: "inline-block",
+  maxWidth: "100%",
+  whiteSpace: "normal"
+};
+
+const alternativesContainerStyle: CSSProperties = {
+  marginTop: "15px",
+  textAlign: "left",
+  width: "100%",
+  paddingLeft: "10px",
+}; const alternativeItemStyle: CSSProperties = {
+  marginBottom: "15px",
+  padding: "10px",
+  border: "1px solid #2e7d32",
+  borderRadius: "8px",
+  backgroundColor: "#f4fff4",
+};
 
 const buttonStyle: CSSProperties = {
   backgroundColor: "#2e7d32",
