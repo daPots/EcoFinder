@@ -14,20 +14,20 @@ const extractProductData = () => {
   const fractionPriceElement = priceContainer?.querySelector(".a-price-fraction")?.textContent?.trim();
   const productPrice = wholePriceElement
     ? fractionPriceElement
-      ? `$${wholePriceElement}.${fractionPriceElement}`
-      : `$${wholePriceElement}.00`
+      ? `$${wholePriceElement}${fractionPriceElement}`
+      : `$${wholePriceElement}00`
     : "Price Not Found";
 
   const ratingContainer = document.getElementById("acrPopover");
   const ratingElement = ratingContainer?.querySelector(".a-size-base.a-color-base");
   const productRating = ratingElement?.textContent?.trim() || "Rating Not Found";
-  const websiteName = getWebsiteName();
+  const productWebsite = getWebsiteName();
   chrome.runtime.sendMessage({
     action: "sendProductData",
     name: productName,
     price: productPrice,
     rating: productRating,
-    website: websiteName,
+    website: productWebsite,
   });
 };
 
@@ -38,6 +38,12 @@ const observer = new MutationObserver((mutations, obs) => {
   }
 });
 observer.observe(document.body, { childList: true, subtree: true });
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "requestProductData") {
+    extractProductData();
+  }
+});
 
 setTimeout(() => {
   if (document.getElementById("productTitle")) {

@@ -37,9 +37,7 @@ const fetchEcoAlternatives = async (productName: string, productPrice: string, p
     );
 
     const rawResponse = response.data.choices[0]?.message?.content || "";
-    console.log("rawResponse:", rawResponse);
     const alternatives = response.data.choices[0]?.message?.content?.split("\n").filter(Boolean) || [];
-    console.log("alternatives:", alternatives);
     
     const formattedAlts = alternatives.map((alt: string) => {
       const [rawName, rawDescription] = alt.trim().split(":");    
@@ -57,9 +55,7 @@ const fetchEcoAlternatives = async (productName: string, productPrice: string, p
   
       return name && description ? [name, url, description] : null;
     }).filter(Boolean);
-    
-    console.log("formattedAlts:", formattedAlts);
-  
+      
     chrome.runtime.sendMessage({
       action: "displayAlternatives",
       alternatives: formattedAlts,
@@ -87,5 +83,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
   }
 
+  if (message.action === "requestProductData") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "requestProductData" });
+      }
+    });
+  
+    chrome.storage.local.get("savedAlternatives", (data) => {
+      if (data.savedAlternatives) {
+        chrome.runtime.sendMessage({
+          action: "displayAlternatives",
+          alternatives: data.savedAlternatives,
+        });
+      }
+    });
+  }
+  
   return true;
 });

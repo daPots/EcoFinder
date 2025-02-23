@@ -16,8 +16,8 @@ const App = () => {
 
   const [alternatives, setAlternatives] = useState<string[][]>([]);
 
-  useEffect(() => {  
-    const messageListener = (message: { action: string; alternatives?: string[][]; name?: string; price?: string; rating?: string; website?: string }) => {  
+  useEffect(() => {
+    const messageListener = (message: { action: string; alternatives?: string[][]; name?: string; price?: string; rating?: string; website?: string }) => {
       if (message.action === "updatePopup") {
         setProductName(message.name || "Not Found");
         setProductPrice(message.price || "Not Found");
@@ -27,13 +27,19 @@ const App = () => {
   
       if (message.action === "displayAlternatives") {
         setAlternatives(message.alternatives || []);
+        chrome.storage.local.set({ savedAlternatives: message.alternatives }, () => {});
         setLoading(false);
       }
     };
   
-    chrome.runtime.onMessage.addListener(messageListener);
+    chrome.storage.local.get("savedAlternatives", (data) => {
+      if (data.savedAlternatives) {
+        setAlternatives(data.savedAlternatives);
+      }
+    });
+    
     chrome.runtime.sendMessage({ action: "requestProductData" });
-  
+    chrome.runtime.onMessage.addListener(messageListener);  
     return () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
@@ -53,7 +59,8 @@ const App = () => {
         if (chrome.runtime.lastError) setLoading(false);
       }
     );
-  };  
+  };
+  
 
   return (
     <div style={windowStyle}>
@@ -94,7 +101,7 @@ const App = () => {
               <li key={index} style={alternativeItemStyle}>
                 <p><strong>Alternative:</strong> {alt[0]}</p>
                 <p><strong>URL:</strong> <a href={alt[1]} target="_blank" rel="noopener noreferrer" style={urlStyle}>{alt[1]}</a></p>
-                <p><strong>Description:</strong> {alt[2]}</p>
+                <p><strong>Why It's Better:</strong> {alt[2]}</p>
               </li>
             ))}
           </ul>
