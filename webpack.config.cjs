@@ -1,50 +1,31 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-  mode: 'production',
-  target: 'web',
+  mode: "production",
   entry: {
-    contentScript: './src/content/index.ts',
-    background: './src/background/index.ts',
-    react: './src/react/index.tsx'
+    content: "./src/content/index.ts",
+    background: "./src/background/index.ts",
+    react: "./src/react/index.tsx"
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
-    clean: true
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+    assetModuleFilename: "images/[hash][ext][query]",
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './src/index.html'
-    }),
-    new CopyPlugin({
-      patterns: [{
-        from: path.resolve('manifest.json'),
-        to: path.resolve('dist')
-      }]
-    })
-  ],
   module: {
     rules: [
       {
-        test: /.(ts|tsx)$/,
+        test: /\.tsx?$/,
+        use: "ts-loader",
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-env',
-              ['@babel/preset-react', {'runtime': 'automatic'}],
-              '@babel/preset-typescript'
-            ]
-          }
-        }
-      }
-    ]
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        type: "asset/resource",
+      },
+    ],
   },
   resolve: {
-    extensions: ['.ts', '.tsx']
-  }
+    extensions: [".tsx", ".ts", ".js"],
+  },
 };
