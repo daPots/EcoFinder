@@ -96,7 +96,7 @@ const App = () => {
       {alternatives.length > 0 && (
         <div style={alternativesContainerStyle}>
           <h2>Eco-Friendly Alternatives:</h2>
-          <ul>
+          <ol>
             {alternatives.map((alt, index) => (
               <li key={index} style={alternativeItemStyle}>
                 <p><strong>Alternative:</strong> {alt[0]}</p>
@@ -104,7 +104,7 @@ const App = () => {
                 <p><strong>Why It's Better:</strong> {alt[2]}</p>
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
       )}
     </div>
@@ -129,6 +129,7 @@ const alternativesContainerStyle: CSSProperties = {
   textAlign: "left",
   width: "100%",
   paddingLeft: "10px",
+  marginRight: "30px",
 }; const alternativeItemStyle: CSSProperties = {
   marginBottom: "15px",
   padding: "10px",
@@ -138,6 +139,7 @@ const alternativesContainerStyle: CSSProperties = {
 };
 
 const buttonStyle: CSSProperties = {
+  fontFamily: "Nunito",
   backgroundColor: "#2e7d32",
   border: "none",
   color: "#fff",
@@ -176,13 +178,13 @@ const titleStyle: CSSProperties = {
 
 const windowStyle: CSSProperties = {
   padding: "10px",
-  fontFamily: "Arial",
   background: "#f4fff4",
   width: "300px",
   textAlign: "center",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  fontFamily: "Nunito",
 };
 
 const spinnerStyle: CSSProperties = {
